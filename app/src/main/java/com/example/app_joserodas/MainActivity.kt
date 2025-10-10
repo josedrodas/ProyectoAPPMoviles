@@ -32,11 +32,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home() {
-    // Tamaños (ajústalos si quieres)
-    val BAR_HEIGHT = 120.dp     // alto barra
-    val LOGO_HEIGHT = 96.dp     // alto logo
-    val MENU_SIZE = 40.sp       // tamaño del "☰" (antes 32.sp)
-    val MENU_TOUCH = 56.dp      // zona táctil mínima recomendada
+    val BAR_HEIGHT = 120.dp
+    val LOGO_HEIGHT = 96.dp
+    val MENU_SIZE = 40.sp
+    val MENU_TOUCH = 56.dp
 
     var menu by remember { mutableStateOf(false) }
 
@@ -59,10 +58,9 @@ fun Home() {
                 )
                 Spacer(Modifier.weight(1f))
 
-                // Hamburguesa grande con área táctil amplia
                 Box(
                     modifier = Modifier
-                        .size(MENU_TOUCH) // 56dp x 56dp
+                        .size(MENU_TOUCH)
                         .clickable { menu = true },
                     contentAlignment = Alignment.Center
                 ) {
