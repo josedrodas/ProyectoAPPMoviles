@@ -1,4 +1,3 @@
-package com.example.app_joserodas
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
