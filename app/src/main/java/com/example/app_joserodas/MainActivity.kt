@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app_joserodas.ui.theme.APP_JoseRodasTheme
@@ -32,7 +33,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home() {
-
     var menu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -52,6 +52,7 @@ fun Home() {
                     modifier = Modifier.height(96.dp),
                     contentScale = ContentScale.Fit
                 )
+
                 Spacer(Modifier.weight(1f))
 
                 Box(
@@ -61,21 +62,26 @@ fun Home() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text("☰", color = Color.White, fontSize = 40.sp)
-                }
 
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(text = { Text("Iniciar sesión") }, onClick = { menu = false })
-                    DropdownMenuItem(text = { Text("Preguntas frecuentes") }, onClick = { menu = false })
-                    DropdownMenuItem(text = { Text("Términos y condiciones") }, onClick = { menu = false })
+                    DropdownMenu(
+                        expanded = menu,
+                        onDismissRequest = { menu = false },
+                        offset = DpOffset(x = 0.dp, y = 8.dp)
+                    ) {
+                        DropdownMenuItem(text = { Text("Iniciar sesión") }, onClick = { menu = false })
+                        DropdownMenuItem(text = { Text("Preguntas frecuentes") }, onClick = { menu = false })
+                        DropdownMenuItem(text = { Text("Términos y condiciones") }, onClick = { menu = false })
+                    }
                 }
             }
         }
-    ) { inner ->
-        Box(
+    ) { inner -> Box(
             modifier = Modifier
                 .padding(inner)
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
-        ) { Text("Bienvenido a Palabras Radiantes") }
+        ) {
+            Text("Bienvenido a Palabras Radiantes")
+        }
     }
 }
