@@ -41,7 +41,7 @@ fun Home() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFDE4954)) // barra
+                    .background(Color(0xFFDE4954))
                     .statusBarsPadding()
                     .height(120.dp)
                     .padding(horizontal = 16.dp),
@@ -78,7 +78,7 @@ fun Home() {
                         .clickable { menu = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("☰", color = Color.White, fontSize = 40.sp)
+                    Text("☰", color = Color.Black, fontSize = 35.sp)
 
                     DropdownMenu(
                         expanded = menu,
