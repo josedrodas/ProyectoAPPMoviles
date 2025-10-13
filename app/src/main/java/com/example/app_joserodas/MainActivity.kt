@@ -1,3 +1,5 @@
+package com.example.app_joserodas
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,10 +32,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Home() {
-    val BAR_HEIGHT = 120.dp
-    val LOGO_HEIGHT = 96.dp
-    val MENU_SIZE = 40.sp
-    val MENU_TOUCH = 56.dp
 
     var menu by remember { mutableStateOf(false) }
 
@@ -42,27 +40,27 @@ fun Home() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF0D47A1))
+                    .background(Color(0xFFDE4954))
                     .statusBarsPadding()
-                    .height(BAR_HEIGHT)
+                    .height(120.dp)
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = painterResource(R.drawable.logo_palabras_radiantes),
                     contentDescription = null,
-                    modifier = Modifier.height(LOGO_HEIGHT),
+                    modifier = Modifier.height(96.dp),
                     contentScale = ContentScale.Fit
                 )
                 Spacer(Modifier.weight(1f))
 
                 Box(
                     modifier = Modifier
-                        .size(MENU_TOUCH)
+                        .size(56.dp)
                         .clickable { menu = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("☰", color = Color.White, fontSize = MENU_SIZE)
+                    Text("☰", color = Color.White, fontSize = 40.sp)
                 }
 
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
