@@ -176,6 +176,7 @@ fun Home() {
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewHome() { APP_JoseRodasTheme { Home() } }
