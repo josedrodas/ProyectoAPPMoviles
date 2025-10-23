@@ -4,5 +4,6 @@ data class Usuario(
     val id: Long,
     val email: String,
     val nombre: String,
-    val apellido: String
+    val apellido: String,
+    val telefono: String
 )
