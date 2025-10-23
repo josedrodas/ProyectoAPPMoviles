@@ -1,4 +1,4 @@
-package com.example.app_joserodas.ui.theme
+package com.example.app_joserodas.ui.theme.theme
 
 import androidx.compose.ui.graphics.Color
 

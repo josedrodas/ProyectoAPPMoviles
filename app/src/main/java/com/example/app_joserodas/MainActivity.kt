@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.app_joserodas.ui.theme.APP_JoseRodasTheme
+import com.example.app_joserodas.ui.theme.theme.APP_JoseRodasTheme
 import kotlinx.coroutines.delay
 
 
