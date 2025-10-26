@@ -1,9 +1,10 @@
 package com.example.app_joserodas.model
 
 data class Libro(
-    val id: String,
+    val idLibro: Int,
     val titulo: String,
-    val autor: String,
+    val autor: Autor,
+    val editorial: Editorial,
     val precio: Int,
     val imagenRes: Int,
     val descripcion: String

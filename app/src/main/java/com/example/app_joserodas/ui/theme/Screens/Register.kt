@@ -13,7 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun LoginScreen(onBack: () -> Unit, onGoRegister: () -> Unit, onLogged: () -> Unit) {
+fun RegisterScreen(onBack: () -> Unit, onRegistered: () -> Unit) {
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
 
@@ -26,7 +28,7 @@ fun LoginScreen(onBack: () -> Unit, onGoRegister: () -> Unit, onLogged: () -> Un
             ) {
                 Text("←", color = Color.White, fontSize = 22.sp,
                     modifier = Modifier.clickable { onBack() }.padding(end = 12.dp))
-                Text("Iniciar sesión", color = Color.White, fontSize = 18.sp)
+                Text("Registro", color = Color.White, fontSize = 18.sp)
             }
         }
     ) { inner ->
@@ -34,16 +36,18 @@ fun LoginScreen(onBack: () -> Unit, onGoRegister: () -> Unit, onLogged: () -> Un
             Modifier.padding(inner).padding(16.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(value = apellido, onValueChange = { apellido = it }, label = { Text("Apellido") }, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
             OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
             OutlinedTextField(value = pass, onValueChange = { pass = it }, label = { Text("Contraseña") },
                 visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(16.dp))
-            Button(onClick = { if (email.isNotBlank() && pass.isNotBlank()) onLogged() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Entrar")
-            }
-            Spacer(Modifier.height(12.dp))
-            Text("¿No tienes cuenta? Regístrate", modifier = Modifier.clickable { onGoRegister() })
+            Button(onClick = {
+                if (nombre.isNotBlank() && apellido.isNotBlank() && email.isNotBlank() && pass.isNotBlank()) onRegistered()
+            }, modifier = Modifier.fillMaxWidth()) { Text("Crear cuenta") }
         }
     }
 }
