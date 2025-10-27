@@ -76,10 +76,21 @@ class MainViewModel : ViewModel() {
         Editorial(3, "Anagrama", "España")
     )
 
+    // 10 LIBROS (usa tus drawables reales)
     val todosLosProductos: List<Libro> = listOf(
-        Libro(1, "Palabras Radiantes", autores[0], editoriales[0], 18990, R.drawable.palabrasradiantes, "Segundo libro de la saga El Archivo de las Tormentas."),
-        Libro(2, "El Imperio Final", autores[0], editoriales[1], 15990, R.drawable.imperiofinal, "Primer libro de Nacidos de la Bruma."),
-        Libro(3, "Juramentada", autores[0], editoriales[0], 21990, R.drawable.juramentada, "Tercer libro del Archivo de las Tormentas.")
+        // 1-3 existentes
+        Libro(1, "Palabras Radiantes", autores[0], editoriales[0], 18990, R.drawable.palabrasradiantes, "Segundo libro de El Archivo de las Tormentas."),
+        Libro(2, "El Imperio Final",   autores[0], editoriales[1], 15990, R.drawable.imperiofinal,       "Primer libro de Nacidos de la Bruma."),
+        Libro(3, "Juramentada",        autores[0], editoriales[0], 21990, R.drawable.juramentada,        "Tercer libro de El Archivo de las Tormentas."),
+
+        // 4-10 nuevos
+        Libro(4, "El Camino de los Reyes", autores[0], editoriales[0], 19990, R.drawable.caminoreyes,     "Inicio de El Archivo de las Tormentas."),
+        Libro(5, "El Ritmo de la Guerra",  autores[0], editoriales[0], 23990, R.drawable.ritmoguerra,     "Cuarto libro de El Archivo de las Tormentas."),
+        Libro(6, "Dune",                   Autor(4, "Frank", "Herbert"), editoriales[2], 17990, R.drawable.dune1,                "Clásico de ciencia ficción."),
+        Libro(7, "El Problema de los Tres Cuerpos", Autor(5, "Cixin", "Liu"), editoriales[2], 17990, R.drawable.problema3cuerpos, "Primera entrega de la trilogía."),
+        Libro(8, "Fundación",              Autor(6, "Isaac", "Asimov"),  editoriales[1], 15990, R.drawable.fundacion,            "Pilar de la ciencia ficción."),
+        Libro(9, "1984",                   Autor(7, "George", "Orwell"), editoriales[2], 12990, R.drawable.libro1984,            "Distopía sobre vigilancia y control."),
+        Libro(10, "Harry Potter y la Piedra Filosofal", autores[1], editoriales[1], 13990, R.drawable.piedrafilosofal,           "El comienzo del joven mago.")
     )
 
     // --------- Carrito ---------
@@ -90,7 +101,6 @@ class MainViewModel : ViewModel() {
     var descuentoAplicado: Int = 0
         private set
 
-    // Códigos de descuento válidos
     private val codigosDescuento = mapOf(
         "LIBRO10" to 10,
         "LECTOR15" to 15,
@@ -149,14 +159,11 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(destacado = libro) }
     }
 
-    // --------- Sistema de Descuentos Simple ---------
+    //  Sistemaa DEsc
     fun aplicarDescuento(codigo: String): String {
         val codigoLimpio = codigo.trim().uppercase()
-
         return when {
-            codigoLimpio.isEmpty() -> {
-                "Ingresa un código de descuento"
-            }
+            codigoLimpio.isEmpty() -> "Ingresa un código de descuento"
             codigosDescuento.containsKey(codigoLimpio) -> {
                 descuentoAplicado = codigosDescuento[codigoLimpio] ?: 0
                 "¡Descuento del $descuentoAplicado% aplicado!"
@@ -168,14 +175,10 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun limpiarDescuento() {
-        descuentoAplicado = 0
-    }
+    fun limpiarDescuento() { descuentoAplicado = 0 }
 
-    // --------- Cálculos con Descuento ---------
-    fun obtenerTotalCarrito(): Int {
-        return _carrito.sumOf { it.precio }
-    }
+    //Cálculos Descuento
+    fun obtenerTotalCarrito(): Int = _carrito.sumOf { it.precio }
 
     fun obtenerTotalConDescuento(): Int {
         val total = obtenerTotalCarrito()
@@ -192,9 +195,6 @@ class MainViewModel : ViewModel() {
     fun getProductoPorId(idLibro: Int): Libro? = todosLosProductos.find { it.idLibro == idLibro }
     fun agregarAlCarrito(libro: Libro) = _carrito.add(libro)
     fun eliminarDelCarrito(libro: Libro) = _carrito.remove(libro)
-    fun limpiarCarrito() {
-        _carrito.clear()
-        limpiarDescuento()
-    }
+    fun limpiarCarrito() { _carrito.clear(); limpiarDescuento() }
     fun obtenerCantidadTotal(): Int = _carrito.size
 }
