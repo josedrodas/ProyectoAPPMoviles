@@ -82,9 +82,21 @@ class MainViewModel : ViewModel() {
         Libro(3, "Juramentada", autores[0], editoriales[0], 21990, R.drawable.juramentada, "Tercer libro del Archivo de las Tormentas.")
     )
 
-    // --------- Carrito (igual que ya tenías) ---------
+    // --------- Carrito ---------
     private val _carrito = mutableStateListOf<Libro>()
     val carrito: List<Libro> get() = _carrito
+
+    // --------- Sistema de Descuentos Simple ---------
+    var descuentoAplicado: Int = 0
+        private set
+
+    // Códigos de descuento válidos
+    private val codigosDescuento = mapOf(
+        "LIBRO10" to 10,
+        "LECTOR15" to 15,
+        "PALABRAS20" to 20,
+        "RADIANTES25" to 25
+    )
 
     init {
         _uiState.update {
@@ -137,11 +149,52 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(destacado = libro) }
     }
 
+    // --------- Sistema de Descuentos Simple ---------
+    fun aplicarDescuento(codigo: String): String {
+        val codigoLimpio = codigo.trim().uppercase()
+
+        return when {
+            codigoLimpio.isEmpty() -> {
+                "Ingresa un código de descuento"
+            }
+            codigosDescuento.containsKey(codigoLimpio) -> {
+                descuentoAplicado = codigosDescuento[codigoLimpio] ?: 0
+                "¡Descuento del $descuentoAplicado% aplicado!"
+            }
+            else -> {
+                descuentoAplicado = 0
+                "Código inválido o expirado"
+            }
+        }
+    }
+
+    fun limpiarDescuento() {
+        descuentoAplicado = 0
+    }
+
+    // --------- Cálculos con Descuento ---------
+    fun obtenerTotalCarrito(): Int {
+        return _carrito.sumOf { it.precio }
+    }
+
+    fun obtenerTotalConDescuento(): Int {
+        val total = obtenerTotalCarrito()
+        val descuento = (total * descuentoAplicado) / 100
+        return total - descuento
+    }
+
+    fun obtenerAhorro(): Int {
+        val total = obtenerTotalCarrito()
+        return (total * descuentoAplicado) / 100
+    }
+
     // --------- Carrito functions ---------
     fun getProductoPorId(idLibro: Int): Libro? = todosLosProductos.find { it.idLibro == idLibro }
     fun agregarAlCarrito(libro: Libro) = _carrito.add(libro)
     fun eliminarDelCarrito(libro: Libro) = _carrito.remove(libro)
-    fun limpiarCarrito() = _carrito.clear()
-    fun obtenerTotalCarrito(): Int = _carrito.sumOf { it.precio }
+    fun limpiarCarrito() {
+        _carrito.clear()
+        limpiarDescuento()
+    }
     fun obtenerCantidadTotal(): Int = _carrito.size
 }

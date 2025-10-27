@@ -6,10 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app_joserodas.viewmodel.MainViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun CarritoScreen(
@@ -26,6 +28,25 @@ fun CarritoScreen(
     onBack: () -> Unit
 ) {
     val carrito = viewModel.carrito
+
+    // Estados locales para el sistema de descuentos
+    var codigoInput by remember { mutableStateOf("") }
+    var mensajeDescuento by remember { mutableStateOf("") }
+    var mostrarMensaje by remember { mutableStateOf(false) }
+
+    // Calcular totales
+    val total = viewModel.obtenerTotalCarrito()
+    val totalConDescuento = viewModel.obtenerTotalConDescuento()
+    val ahorro = viewModel.obtenerAhorro()
+    val descuentoAplicado = viewModel.descuentoAplicado
+
+    // Manejar el mensaje temporal de descuento
+    LaunchedEffect(mostrarMensaje) {
+        if (mostrarMensaje) {
+            delay(3000)
+            mostrarMensaje = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -67,7 +88,7 @@ fun CarritoScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("🛒", fontSize = 64.sp)
+                Text("Carrito vacío", fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Tu carrito está vacío",
                     fontSize = 18.sp,
@@ -76,7 +97,10 @@ fun CarritoScreen(
                     fontSize = 14.sp,
                     color = Color.Gray)
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onBack) {
+                Button(
+                    onClick = onBack,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954))
+                ) {
                     Text("Seguir Comprando")
                 }
             }
@@ -95,30 +119,172 @@ fun CarritoScreen(
                     }
                 }
 
-                Column(
+                // Sección de descuento
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        Text("Total:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Text("$${viewModel.obtenerTotalCarrito()}",
+                        Text(
+                            text = "Código de Descuento",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = codigoInput,
+                                onValueChange = { codigoInput = it },
+                                placeholder = { Text("Ej: LIBRO10, LECTOR15") },
+                                modifier = Modifier.weight(1f),
+                                singleLine = true
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    val resultado = viewModel.aplicarDescuento(codigoInput)
+                                    mensajeDescuento = resultado
+                                    mostrarMensaje = true
+                                    codigoInput = ""
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954))
+                            ) {
+                                Text("Aplicar")
+                            }
+                        }
+
+                        // Mostrar mensaje de descuento
+                        if (mostrarMensaje) {
+                            Text(
+                                text = mensajeDescuento,
+                                color = if (descuentoAplicado > 0) Color.Green else Color.Red,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+
+                        // Mostrar descuento aplicado
+                        if (descuentoAplicado > 0) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Descuento aplicado:")
+                                Text(
+                                    text = "${descuentoAplicado}%",
+                                    color = Color.Green,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    viewModel.limpiarDescuento()
+                                    mostrarMensaje = false
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                            ) {
+                                Text("Quitar descuento")
+                            }
+                        }
+                    }
+                }
+
+                // Resumen de compra
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Resumen de Compra",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary)
-                    }
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Subtotal:")
+                            Text("$$total")
+                        }
 
-                    Button(
-                        onClick = { viewModel.limpiarCarrito() },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("Vaciar Carrito")
+                        if (descuentoAplicado > 0) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Descuento (${descuentoAplicado}%):")
+                                Text(
+                                    text = "-$$ahorro",
+                                    color = Color.Green,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Total:",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "$$totalConDescuento",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFDE4954)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                // Lógica de pago
+                                viewModel.limpiarCarrito()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954))
+                        ) {
+                            Text("Proceder al Pago")
+                        }
+
+                        Button(
+                            onClick = { viewModel.limpiarCarrito() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .padding(top = 8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) {
+                            Text("Vaciar Carrito")
+                        }
                     }
                 }
             }
@@ -170,7 +336,7 @@ fun ItemCarrito(
                     text = "$${libro.precio}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFFDE4954)
                 )
             }
 
