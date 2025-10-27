@@ -24,7 +24,6 @@ class MainViewModel : ViewModel() {
     enum class Rol { ADMIN, USER }
     data class AppUser(val nombre: String, val email: String, val rol: Rol)
 
-    // 2 usuarios fijos (credenciales)
     private data class Cred(val email: String, val pass: String, val user: AppUser)
     private val seededUsers = listOf(
         Cred(
@@ -76,7 +75,6 @@ class MainViewModel : ViewModel() {
     )
 
     val todosLosProductos: List<Libro> = listOf(
-        // 1-3 existentes
         Libro(1, "Palabras Radiantes", autores[0], editoriales[0], 18990, R.drawable.palabrasradiantes, "Segundo libro de El Archivo de las Tormentas."),
         Libro(2, "El Imperio Final",   autores[0], editoriales[1], 15990, R.drawable.imperiofinal,       "Primer libro de Nacidos de la Bruma."),
         Libro(3, "Juramentada",        autores[0], editoriales[0], 21990, R.drawable.juramentada,        "Tercer libro de El Archivo de las Tormentas."),
@@ -98,6 +96,7 @@ class MainViewModel : ViewModel() {
     var descuentoAplicado: Int = 0
         private set
 
+    //codisog desc
     private val codigosDescuento = mapOf(
         "LIBRO10" to 10,
         "LECTOR15" to 15,
