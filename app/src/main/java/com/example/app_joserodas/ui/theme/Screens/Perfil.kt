@@ -1,34 +1,41 @@
 package com.example.app_joserodas.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.app_joserodas.viewmodel.MainViewModel
 
 @Composable
-fun PerfilScreen(onBack: () -> Unit) {
-    Scaffold(
-        topBar = {
-            Row(
-                Modifier.fillMaxWidth().background(Color(0xFFDE4954))
-                    .statusBarsPadding().height(56.dp).padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("←", color = Color.White, fontSize = 22.sp,
-                    modifier = Modifier.clickable { onBack() }.padding(end = 12.dp))
-                Text("Mi Perfil", color = Color.White, fontSize = 18.sp)
-            }
+fun PerfilScreen(
+    viewModel: MainViewModel,
+    onBack: () -> Unit
+) {
+    val user by viewModel.currentUser.collectAsState()
+
+    Column(Modifier.padding(16.dp)) {
+        Text("Mi Perfil", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(16.dp))
+
+        if (user == null) {
+            Text("No has iniciado sesión.")
+            Spacer(Modifier.height(12.dp))
+            Text("Inicia sesión desde el menú para ver tu información.")
+        } else {
+            Text("Nombre: ${user!!.nombre}")
+            Text("Email: ${user!!.email}")
+            Text("Rol: ${user!!.rol.name}")
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = { viewModel.logout(); onBack() },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Cerrar sesión") }
         }
-    ) { inner ->
-        Column(Modifier.padding(inner).padding(16.dp)) {
-            Text("Aquí irán los datos del usuario.")
+
+        Spacer(Modifier.height(16.dp))
+        TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Volver")
         }
     }
 }

@@ -1,49 +1,75 @@
 package com.example.app_joserodas.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.app_joserodas.viewmodel.MainViewModel
 
 @Composable
-fun LoginScreen(onBack: () -> Unit, onGoRegister: () -> Unit, onLogged: () -> Unit) {
+fun LoginScreen(
+    viewModel: MainViewModel,
+    onBack: () -> Unit,
+    onGoRegister: () -> Unit, // queda sin uso, pero lo mantenemos por firma
+    onLogged: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
 
-    Scaffold(
-        topBar = {
-            Row(
-                Modifier.fillMaxWidth().background(Color(0xFFDE4954))
-                    .statusBarsPadding().height(56.dp).padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("←", color = Color.White, fontSize = 22.sp,
-                    modifier = Modifier.clickable { onBack() }.padding(end = 12.dp))
-                Text("Iniciar sesión", color = Color.White, fontSize = 18.sp)
-            }
+    val emailOk = email.trim().contains("@") && email.contains(".")
+    val passOk = pass.length >= 8
+    val formOk = emailOk && passOk
+
+    Column(Modifier.padding(16.dp)) {
+        Text("Iniciar sesión", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email, onValueChange = { email = it },
+            label = { Text("Email") },
+            isError = email.isNotEmpty() && !emailOk,
+            supportingText = { if (email.isNotEmpty() && !emailOk) Text("Email inválido") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = pass, onValueChange = { pass = it },
+            label = { Text("Contraseña") },
+            isError = pass.isNotEmpty() && !passOk,
+            supportingText = { if (pass.isNotEmpty() && !passOk) Text("Mínimo 8 caracteres") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(16.dp))
+
+        if (errorMsg != null) {
+            Text(errorMsg!!, color = MaterialTheme.colorScheme.error)
+            Spacer(Modifier.height(8.dp))
         }
-    ) { inner ->
-        Column(
-            Modifier.padding(inner).padding(16.dp).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value = pass, onValueChange = { pass = it }, label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(16.dp))
-            Button(onClick = { if (email.isNotBlank() && pass.isNotBlank()) onLogged() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Entrar")
-            }
-            Spacer(Modifier.height(12.dp))
-            Text("¿No tienes cuenta? Regístrate", modifier = Modifier.clickable { onGoRegister() })
+
+        Button(
+            onClick = {
+                errorMsg = null
+                val result = viewModel.login(email, pass)
+                result.onSuccess { onLogged() }
+                    .onFailure { e -> errorMsg = e.message ?: "Credenciales inválidas" }
+            },
+            enabled = formOk,
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Entrar") }
+
+        TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Volver")
         }
+
+        // Si quieres mostrar ayudas:
+        Spacer(Modifier.height(24.dp))
+        Text("Usuarios de prueba:", style = MaterialTheme.typography.titleMedium)
+        Text("• admin@palabras.com / Admin1234")
+        Text("• usuario@palabras.com / User1234")
     }
 }

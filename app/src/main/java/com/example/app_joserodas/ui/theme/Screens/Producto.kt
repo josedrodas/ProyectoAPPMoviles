@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app_joserodas.viewmodel.MainViewModel
@@ -62,7 +64,8 @@ fun ProductoScreen(
                     )
                     Text("Detalle del Producto",
                         color = Color.White,
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -89,7 +92,8 @@ fun ProductoScreen(
 
                 Text(
                     libro.titulo,
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -109,24 +113,27 @@ fun ProductoScreen(
                 Text(
                     libro.descripcion,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    lineHeight = 20.sp
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     "$${libro.precio}",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFFDE4954),
+                    fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 if (mostrarMensaje) {
                     Text(
                         "✓ ¡Agregado al carrito!",
                         color = Color.Green,
                         fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -135,18 +142,43 @@ fun ProductoScreen(
                     onClick = {
                         viewModel.agregarAlCarrito(libro)
                         mostrarMensaje = true
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954)),
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(50.dp)
                 ) {
-                    Text("Agregar al Carrito")
+                    Text("Agregar al Carrito", fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onBack,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(50.dp)
+                ) {
+                    Text("Volver al Inicio", fontSize = 16.sp)
                 }
             } else {
-                Text("Producto no encontrado", fontSize = 18.sp)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = onBack) {
-                Text("Volver al Inicio")
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Producto no encontrado", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = onBack,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954))
+                    ) {
+                        Text("Volver al Inicio")
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))

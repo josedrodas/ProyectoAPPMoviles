@@ -28,7 +28,35 @@ fun PreguntasScreen(onBack: () -> Unit) {
         }
     ) { inner ->
         Column(Modifier.padding(inner).padding(16.dp)) {
-            Text("Contenido de preguntas frecuentes.")
+            Text("FAQ — Palabras Radiantes\n" +
+                    "\n" +
+                    "1) ¿Envían a todo Chile?\n" +
+                    "Sí, por [Courier]. Retiro gratis en [dirección].\n" +
+                    "\n" +
+                    "2) ¿Cuánto demora?\n" +
+                    "RM: 24–72 h hábiles. Regiones: 2–6 días.\n" +
+                    "\n" +
+                    "3) ¿Cuánto cuesta el envío?\n" +
+                    "Se calcula al pagar.\n" +
+                    "\n" +
+                    "4) ¿Qué medios de pago aceptan?\n" +
+                    "Débito/crédito, transferencia y [otros].\n" +
+                    "\n" +
+                    "5) ¿Cómo sigo mi pedido?\n" +
+                    "Te llega un tracking por correo.\n" +
+                    "\n" +
+                    "6) ¿Cambios/Devoluciones?\n" +
+                    "10 días (sin uso). Fallas: garantía legal 6 meses.\n" +
+                    "\n" +
+                    "7) ¿Factura?\n" +
+                    "Sí, selecciónala al pagar.\n" +
+                    "\n" +
+                    "8) ¿Libro agotado o a pedido?\n" +
+                    "Reservamos y te avisamos fecha estimada.\n" +
+                    "\n" +
+                    "9) ¿Atención al cliente?\n" +
+                    "[correo] · [WhatsApp] · Lun–Vie [horario].\n" +
+                    "\n")
         }
     }
 }
