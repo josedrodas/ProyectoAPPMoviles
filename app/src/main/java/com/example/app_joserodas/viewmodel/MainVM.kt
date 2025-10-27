@@ -20,7 +20,7 @@ class MainViewModel : ViewModel() {
         fun getInstance(): MainViewModel = instance ?: MainViewModel().also { instance = it }
     }
 
-    // --------- Tipos para Auth ---------
+    // auth para admin y user
     enum class Rol { ADMIN, USER }
     data class AppUser(val nombre: String, val email: String, val rol: Rol)
 
@@ -52,7 +52,7 @@ class MainViewModel : ViewModel() {
 
     fun logout() { _currentUser.value = null }
 
-    // --------- UI STATE (Home) ---------
+    // estado ui del home
     data class HomeUiState(
         val textoBusqueda: String = "",
         val estaBuscando: Boolean = false,
@@ -64,7 +64,6 @@ class MainViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
 
-    // --------- Catálogo estático ---------
     private val autores = listOf(
         Autor(1, "Brandon", "Sanderson"),
         Autor(2, "J. K.", "Rowling"),
@@ -76,14 +75,12 @@ class MainViewModel : ViewModel() {
         Editorial(3, "Anagrama", "España")
     )
 
-    // 10 LIBROS (usa tus drawables reales)
     val todosLosProductos: List<Libro> = listOf(
         // 1-3 existentes
         Libro(1, "Palabras Radiantes", autores[0], editoriales[0], 18990, R.drawable.palabrasradiantes, "Segundo libro de El Archivo de las Tormentas."),
         Libro(2, "El Imperio Final",   autores[0], editoriales[1], 15990, R.drawable.imperiofinal,       "Primer libro de Nacidos de la Bruma."),
         Libro(3, "Juramentada",        autores[0], editoriales[0], 21990, R.drawable.juramentada,        "Tercer libro de El Archivo de las Tormentas."),
 
-        // 4-10 nuevos
         Libro(4, "El Camino de los Reyes", autores[0], editoriales[0], 19990, R.drawable.caminoreyes,     "Inicio de El Archivo de las Tormentas."),
         Libro(5, "El Ritmo de la Guerra",  autores[0], editoriales[0], 23990, R.drawable.ritmoguerra,     "Cuarto libro de El Archivo de las Tormentas."),
         Libro(6, "Dune",                   Autor(4, "Frank", "Herbert"), editoriales[2], 17990, R.drawable.dune1,                "Clásico de ciencia ficción."),
@@ -93,11 +90,11 @@ class MainViewModel : ViewModel() {
         Libro(10, "Harry Potter y la Piedra Filosofal", autores[1], editoriales[1], 13990, R.drawable.piedrafilosofal,           "El comienzo del joven mago.")
     )
 
-    // --------- Carrito ---------
+    // carrito
     private val _carrito = mutableStateListOf<Libro>()
     val carrito: List<Libro> get() = _carrito
 
-    // --------- Sistema de Descuentos Simple ---------
+    // sistema desc
     var descuentoAplicado: Int = 0
         private set
 
@@ -118,7 +115,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    // --------- Búsqueda (StateFlow) ---------
+    // search bar
     fun buscarProductos(texto: String) {
         _uiState.update { it.copy(textoBusqueda = texto, estaBuscando = true) }
         viewModelScope.launch {
@@ -159,7 +156,7 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(destacado = libro) }
     }
 
-    //  Sistemaa DEsc
+    //  Sistemaa Desc
     fun aplicarDescuento(codigo: String): String {
         val codigoLimpio = codigo.trim().uppercase()
         return when {
@@ -177,7 +174,7 @@ class MainViewModel : ViewModel() {
 
     fun limpiarDescuento() { descuentoAplicado = 0 }
 
-    //Cálculos Descuento
+    //Calculos del Descuento
     fun obtenerTotalCarrito(): Int = _carrito.sumOf { it.precio }
 
     fun obtenerTotalConDescuento(): Int {
@@ -191,7 +188,7 @@ class MainViewModel : ViewModel() {
         return (total * descuentoAplicado) / 100
     }
 
-    // --------- Carrito functions ---------
+    // funciones del carrito
     fun getProductoPorId(idLibro: Int): Libro? = todosLosProductos.find { it.idLibro == idLibro }
     fun agregarAlCarrito(libro: Libro) = _carrito.add(libro)
     fun eliminarDelCarrito(libro: Libro) = _carrito.remove(libro)

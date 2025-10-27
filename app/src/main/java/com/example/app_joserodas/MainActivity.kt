@@ -170,7 +170,7 @@ fun HomeScreen(
     // UiState desde el VM
     val state by viewModel.uiState.collectAsState()
 
-    // Rotación del destacado cada 3s
+    // Rotación del destacado
     var libroDestacado by remember { mutableStateOf(state.destacado) }
     LaunchedEffect(viewModel.todosLosProductos) {
         while (true) {
