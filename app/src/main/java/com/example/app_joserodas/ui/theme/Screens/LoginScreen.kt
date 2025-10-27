@@ -12,7 +12,7 @@ import com.example.app_joserodas.viewmodel.MainViewModel
 fun LoginScreen(
     viewModel: MainViewModel,
     onBack: () -> Unit,
-    onGoRegister: () -> Unit, // queda sin uso, pero lo mantenemos por firma
+    onGoRegister: () -> Unit,
     onLogged: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
@@ -23,7 +23,7 @@ fun LoginScreen(
     val passOk = pass.length >= 8
     val formOk = emailOk && passOk
 
-    Column(Modifier.padding(16.dp)) {
+    Column(Modifier.padding(20.dp)) {
         Text("Iniciar sesión", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
@@ -66,7 +66,6 @@ fun LoginScreen(
             Text("Volver")
         }
 
-        // Si quieres mostrar ayudas:
         Spacer(Modifier.height(24.dp))
         Text("Usuarios de prueba:", style = MaterialTheme.typography.titleMedium)
         Text("• admin@palabras.com / Admin1234")

@@ -14,9 +14,9 @@ fun PerfilScreen(
 ) {
     val user by viewModel.currentUser.collectAsState()
 
-    Column(Modifier.padding(16.dp)) {
+    Column(Modifier.padding(20.dp)) {
         Text("Mi Perfil", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(18.dp))
 
         if (user == null) {
             Text("No has iniciado sesión.")

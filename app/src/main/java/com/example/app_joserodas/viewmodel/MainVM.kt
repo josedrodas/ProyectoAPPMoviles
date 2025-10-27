@@ -29,7 +29,7 @@ class MainViewModel : ViewModel() {
         Cred(
             email = "admin@palabras.com",
             pass  = "Admin1234",
-            user  = AppUser(nombre = "Admin Palabras", email = "admin@palabras.com", rol = Rol.ADMIN)
+            user  = AppUser(nombre = "EL fokin Admin", email = "admin@palabras.com", rol = Rol.ADMIN)
         ),
         Cred(
             email = "usuario@palabras.com",

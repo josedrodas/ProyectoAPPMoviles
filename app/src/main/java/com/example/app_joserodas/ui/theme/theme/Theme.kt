@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = androidx.compose.ui.graphics.Color(0xFFDE4954), // Tu color rojo
+    primary = androidx.compose.ui.graphics.Color(0xFFDE4954),
     secondary = androidx.compose.ui.graphics.Color(0xFF03DAC5),
     tertiary = androidx.compose.ui.graphics.Color(0xFF3700B3)
 )

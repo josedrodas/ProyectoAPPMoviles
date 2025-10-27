@@ -1,8 +1,8 @@
 package com.example.app_joserodas
 
-import android.os.Bundle
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -55,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,7 +97,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
+//navegacion
 @Composable
 fun AppRoot(viewModel: MainViewModel) {
     val navController = rememberNavController()
@@ -117,7 +119,7 @@ fun AppRoot(viewModel: MainViewModel) {
             LoginScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onGoRegister = { /* registro deshabilitado */ },
+                onGoRegister = { },
                 onLogged = { navController.popBackStack() }
             )
         }
@@ -152,7 +154,7 @@ fun AppRoot(viewModel: MainViewModel) {
         }
     }
 }
-
+//menu
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
@@ -167,10 +169,8 @@ fun HomeScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
 
-    // UiState desde el VM
     val state by viewModel.uiState.collectAsState()
 
-    // Rotación del destacado
     var libroDestacado by remember { mutableStateOf(state.destacado) }
     LaunchedEffect(viewModel.todosLosProductos) {
         while (true) {
@@ -186,7 +186,6 @@ fun HomeScreen(
             Column(
                 modifier = Modifier.background(Color(0xFFDE4954))
             ) {
-                // Fila superior
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -194,7 +193,6 @@ fun HomeScreen(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Logo a la izquierda
                     Image(
                         painter = painterResource(id = R.drawable.logo_palabras_radiantes),
                         contentDescription = "Logo",
@@ -219,7 +217,8 @@ fun HomeScreen(
                             modifier = Modifier.size(26.dp),
                             contentScale = ContentScale.Fit
                         )
-                        if (viewModel.obtenerCantidadTotal() > 0) {
+                        val cant = viewModel.obtenerCantidadTotal()
+                        if (cant > 0) {
                             Box(
                                 modifier = Modifier
                                     .size(18.dp)
@@ -228,7 +227,7 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = viewModel.obtenerCantidadTotal().toString(),
+                                    text = cant.toString(),
                                     color = Color.White,
                                     fontSize = 10.sp
                                 )
@@ -238,7 +237,7 @@ fun HomeScreen(
 
                     Spacer(Modifier.width(12.dp))
 
-                    // Menú Hamburguesa
+                    // Menú
                     Box(
                         modifier = Modifier
                             .size(44.dp)
@@ -259,7 +258,6 @@ fun HomeScreen(
                     }
                 }
 
-                // Barra de búsqueda
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -334,7 +332,6 @@ fun HomeScreen(
                     fontSize = 10.sp
                 )
                 Spacer(Modifier.width(8.dp))
-                // Instagram → abre Antártica
                 Image(
                     painter = painterResource(id = R.drawable.instagramlogo),
                     contentDescription = "Instagram Antártica Libros",
@@ -355,7 +352,65 @@ fun HomeScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Buscando… con ruedita d carga
+            val resultadosProgresivos = remember { mutableStateListOf<com.example.app_joserodas.model.Libro>() }
+
+            LaunchedEffect(state.textoBusqueda) {
+                resultadosProgresivos.clear()
+                val q = state.textoBusqueda.trim().lowercase()
+                if (q.isNotBlank()) {
+                    val matches = viewModel.todosLosProductos.filter { libro ->
+                        libro.titulo.lowercase().contains(q) ||
+                                libro.autor.nombre.lowercase().contains(q) ||
+                                libro.autor.apellido.lowercase().contains(q) ||
+                                libro.editorial.nombre.lowercase().contains(q)
+                    }
+                    for (item in matches) {
+                        resultadosProgresivos.add(item)
+                        delay(120)
+                    }
+                }
+            }
+
+            AnimatedVisibility(visible = state.textoBusqueda.isNotBlank()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .heightIn(max = 320.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    resultadosProgresivos.forEach { libro ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onOpenProduct(libro.idLibro) }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(id = libro.imagenRes),
+                                contentDescription = libro.titulo,
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .padding(end = 12.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(libro.titulo, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                                Text(
+                                    "por ${libro.autor.nombre} ${libro.autor.apellido}",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray,
+                                    maxLines = 1
+                                )
+                            }
+                            Text("$${libro.precio}", fontSize = 13.sp, color = Color(0xFFDE4954), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+
+            // Indicador ke se esta buscando
             AnimatedVisibility(
                 visible = state.estaBuscando,
                 enter = fadeIn() + expandVertically(),
@@ -375,7 +430,7 @@ fun HomeScreen(
                 }
             }
 
-            // Destacado con Crossfade
+            // Destacado
             Crossfade(targetState = libroDestacado, label = "destacado") { libro ->
                 libro?.let {
                     Column(
