@@ -1,6 +1,8 @@
 package com.example.app_joserodas
 
 import android.os.Bundle
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -60,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -162,6 +165,7 @@ fun HomeScreen(
 ) {
     var menuAbierto by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     // UiState desde el VM
     val state by viewModel.uiState.collectAsState()
@@ -330,10 +334,17 @@ fun HomeScreen(
                     fontSize = 10.sp
                 )
                 Spacer(Modifier.width(8.dp))
+                // Instagram → abre Antártica
                 Image(
                     painter = painterResource(id = R.drawable.instagramlogo),
-                    contentDescription = "Instagram",
-                    modifier = Modifier.size(24.dp)
+                    contentDescription = "Instagram Antártica Libros",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            val url = "https://www.instagram.com/antarticalibros/"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            context.startActivity(intent)
+                        }
                 )
             }
         }
@@ -344,7 +355,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // “Buscando…” con AnimatedVisibility
+            // Buscando… con ruedita d carga
             AnimatedVisibility(
                 visible = state.estaBuscando,
                 enter = fadeIn() + expandVertically(),
@@ -437,7 +448,7 @@ fun HomeScreen(
             Spacer(Modifier.height(12.dp))
 
             when {
-                state.estaBuscando -> {  }
+                state.estaBuscando -> { }
 
                 state.productos.isEmpty() && state.textoBusqueda.isNotEmpty() -> {
                     AnimatedVisibility(
