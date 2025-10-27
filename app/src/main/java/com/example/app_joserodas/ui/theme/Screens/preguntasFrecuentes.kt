@@ -31,7 +31,7 @@ fun PreguntasScreen(onBack: () -> Unit) {
             Text("FAQ — Palabras Radiantes\n" +
                     "\n" +
                     "1) ¿Envían a todo Chile?\n" +
-                    "Sí, por [Courier]. Retiro gratis en [dirección].\n" +
+                    "Sí, por chilexpress. Retiro gratis en tu direccion.\n" +
                     "\n" +
                     "2) ¿Cuánto demora?\n" +
                     "RM: 24–72 h hábiles. Regiones: 2–6 días.\n" +
