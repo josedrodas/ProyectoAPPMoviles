@@ -3,14 +3,37 @@ package com.example.app_joserodas.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,28 +42,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.app_joserodas.viewmodel.MainViewModel
+import com.example.app_joserodas.model.Libro
+import com.example.app_joserodas.viewmodel.CartViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun CarritoScreen(
-    viewModel: MainViewModel,
-    onBack: () -> Unit
+    cartVM: CartViewModel,
+    onBack: () -> Unit,
+    onProcederPago: (Int) -> Unit
 ) {
-    val carrito = viewModel.carrito
+    val carrito = cartVM.carrito
 
-    // Estados locales para el sistema de descuentos
     var codigoInput by remember { mutableStateOf("") }
     var mensajeDescuento by remember { mutableStateOf("") }
     var mostrarMensaje by remember { mutableStateOf(false) }
 
-    // Calcular totales
-    val total = viewModel.obtenerTotalCarrito()
-    val totalConDescuento = viewModel.obtenerTotalConDescuento()
-    val ahorro = viewModel.obtenerAhorro()
-    val descuentoAplicado = viewModel.descuentoAplicado
+    val total = cartVM.obtenerTotalCarrito()
+    val totalConDescuento = cartVM.obtenerTotalConDescuento()
+    val ahorro = cartVM.obtenerAhorro()
+    val descuentoAplicado = cartVM.descuentoAplicado
 
-    // Manejar el mensaje temporal de descuento
     LaunchedEffect(mostrarMensaje) {
         if (mostrarMensaje) {
             delay(3000)
@@ -59,20 +81,23 @@ fun CarritoScreen(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("←",
+                    Text(
+                        "←",
                         color = Color.White,
                         fontSize = 22.sp,
                         modifier = Modifier
                             .clickable { onBack() }
                             .padding(end = 12.dp)
                     )
-                    Text("Mi Carrito",
+                    Text(
+                        "Mi Carrito",
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("${viewModel.obtenerCantidadTotal()} items",
+                    Text(
+                        "${cartVM.obtenerCantidadTotal()} items",
                         color = Color.White,
                         fontSize = 14.sp
                     )
@@ -90,12 +115,16 @@ fun CarritoScreen(
             ) {
                 Text("Carrito vacío", fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Tu carrito está vacío",
+                Text(
+                    "Tu carrito está vacío",
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium)
-                Text("Agrega algunos libros",
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    "Agrega algunos libros",
                     fontSize = 14.sp,
-                    color = Color.Gray)
+                    color = Color.Gray
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = onBack,
@@ -114,12 +143,11 @@ fun CarritoScreen(
                     items(carrito) { libro ->
                         ItemCarrito(
                             libro = libro,
-                            onEliminar = { viewModel.eliminarDelCarrito(libro) }
+                            onEliminar = { cartVM.eliminarDelCarrito(libro) }
                         )
                     }
                 }
 
-                // Sección de descuento
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -152,7 +180,7 @@ fun CarritoScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = {
-                                    val resultado = viewModel.aplicarDescuento(codigoInput)
+                                    val resultado = cartVM.aplicarDescuento(codigoInput)
                                     mensajeDescuento = resultado
                                     mostrarMensaje = true
                                     codigoInput = ""
@@ -163,7 +191,6 @@ fun CarritoScreen(
                             }
                         }
 
-                        // Mostrar mensaje de descuento
                         if (mostrarMensaje) {
                             Text(
                                 text = mensajeDescuento,
@@ -172,7 +199,6 @@ fun CarritoScreen(
                             )
                         }
 
-                        // Mostrar descuento aplicado
                         if (descuentoAplicado > 0) {
                             Row(
                                 modifier = Modifier
@@ -189,7 +215,7 @@ fun CarritoScreen(
                             }
                             Button(
                                 onClick = {
-                                    viewModel.limpiarDescuento()
+                                    cartVM.limpiarDescuento()
                                     mostrarMensaje = false
                                 },
                                 modifier = Modifier
@@ -203,7 +229,6 @@ fun CarritoScreen(
                     }
                 }
 
-                // Resumen de compra
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -264,8 +289,7 @@ fun CarritoScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                // Lógica de pago
-                                viewModel.limpiarCarrito()
+                                onProcederPago(totalConDescuento)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -276,7 +300,7 @@ fun CarritoScreen(
                         }
 
                         Button(
-                            onClick = { viewModel.limpiarCarrito() },
+                            onClick = { cartVM.limpiarCarrito() },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
@@ -294,7 +318,7 @@ fun CarritoScreen(
 
 @Composable
 fun ItemCarrito(
-    libro: com.example.app_joserodas.model.Libro,
+    libro: Libro,
     onEliminar: () -> Unit
 ) {
     Card(
