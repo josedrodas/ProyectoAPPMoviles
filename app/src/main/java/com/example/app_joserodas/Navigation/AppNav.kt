@@ -1,6 +1,7 @@
-package com.example.app_joserodas
+package com.example.app_joserodas.nav
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -8,11 +9,11 @@ import com.example.app_joserodas.ui.screens.CarritoScreen
 import com.example.app_joserodas.ui.screens.EncuentranosScreen
 import com.example.app_joserodas.ui.screens.HomeScreen
 import com.example.app_joserodas.ui.screens.LoginScreen
-import com.example.app_joserodas.ui.screens.PagoConfirmadoScreen
-import com.example.app_joserodas.ui.screens.PagoQRScreen
 import com.example.app_joserodas.ui.screens.PerfilScreen
+import com.example.app_joserodas.ui.screens.PagoScreen
 import com.example.app_joserodas.ui.screens.PreguntasScreen
 import com.example.app_joserodas.ui.screens.ProductoScreen
+import com.example.app_joserodas.ui.screens.QrScannerScreen
 import com.example.app_joserodas.ui.screens.RegisterScreen
 import com.example.app_joserodas.ui.screens.TerminosScreen
 import com.example.app_joserodas.viewmodel.AuthViewModel
@@ -24,11 +25,13 @@ fun AppNav(
     navController: NavHostController,
     catalogVM: CatalogViewModel,
     cartVM: CartViewModel,
-    authVM: AuthViewModel
+    authVM: AuthViewModel,
+    modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "home",
+        modifier = modifier
     ) {
         composable("home") {
             HomeScreen(
@@ -55,7 +58,6 @@ fun AppNav(
 
         composable("register") {
             RegisterScreen(
-                authVM = authVM,
                 onBack = { navController.popBackStack() },
                 onRegistered = { navController.popBackStack() }
             )
@@ -90,9 +92,7 @@ fun AppNav(
             CarritoScreen(
                 cartVM = cartVM,
                 onBack = { navController.popBackStack() },
-                onProcederPago = { total ->
-                    navController.navigate("pagoqr/$total")
-                }
+                onIrPago = { navController.navigate("pago") }
             )
         }
 
@@ -109,24 +109,27 @@ fun AppNav(
             )
         }
 
-        composable("pagoqr/{monto}") { backStackEntry ->
-            val monto = backStackEntry.arguments?.getString("monto")?.toIntOrNull() ?: 0
-            PagoQRScreen(
-                totalAPagar = monto,
-                onPagoConfirmado = {
-                    navController.navigate("pagook")
+        composable("pago") {
+            PagoScreen(
+                cartVM = cartVM,
+                onBack = { navController.popBackStack() },
+                onPagoExitoso = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                    }
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
+                onIrScannerQR = { navController.navigate("qr") }
             )
         }
 
-        composable("pagook") {
-            PagoConfirmadoScreen(
+        composable("qr") {
+            QrScannerScreen(
                 cartVM = cartVM,
-                onVolverInicio = {
-                    navController.popBackStack("home", inclusive = false)
+                onBack = { navController.popBackStack() },
+                onPagoExitoso = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                    }
                 }
             )
         }

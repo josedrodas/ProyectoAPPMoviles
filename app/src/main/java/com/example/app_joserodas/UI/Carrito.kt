@@ -25,13 +25,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,23 +49,25 @@ import kotlinx.coroutines.delay
 fun CarritoScreen(
     cartVM: CartViewModel,
     onBack: () -> Unit,
-    onProcederPago: (Int) -> Unit
+    onIrPago: () -> Unit
 ) {
     val carrito = cartVM.carrito
 
-    var codigoInput by remember { mutableStateOf("") }
-    var mensajeDescuento by remember { mutableStateOf("") }
-    var mostrarMensaje by remember { mutableStateOf(false) }
+    var mostrarMensajeVacio by remember { mutableStateOf(false) }
 
     val total = cartVM.obtenerTotalCarrito()
     val totalConDescuento = cartVM.obtenerTotalConDescuento()
     val ahorro = cartVM.obtenerAhorro()
     val descuentoAplicado = cartVM.descuentoAplicado
+    val cantidadItems = cartVM.obtenerCantidadTotal()
 
-    LaunchedEffect(mostrarMensaje) {
-        if (mostrarMensaje) {
+    LaunchedEffect(carrito.isEmpty()) {
+        mostrarMensajeVacio = carrito.isEmpty()
+    }
+
+    LaunchedEffect(descuentoAplicado) {
+        if (descuentoAplicado > 0) {
             delay(3000)
-            mostrarMensaje = false
         }
     }
 
@@ -97,7 +98,7 @@ fun CarritoScreen(
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        "${cartVM.obtenerCantidadTotal()} items",
+                        "$cantidadItems items",
                         color = Color.White,
                         fontSize = 14.sp
                     )
@@ -105,6 +106,7 @@ fun CarritoScreen(
             }
         }
     ) { innerPadding ->
+
         if (carrito.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -134,12 +136,17 @@ fun CarritoScreen(
                 }
             }
         } else {
+
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 8.dp)
+                ) {
                     items(carrito) { libro ->
                         ItemCarrito(
                             libro = libro,
@@ -155,89 +162,7 @@ fun CarritoScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Código de Descuento",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedTextField(
-                                value = codigoInput,
-                                onValueChange = { codigoInput = it },
-                                placeholder = { Text("Ej: LIBRO10, LECTOR15") },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(
-                                onClick = {
-                                    val resultado = cartVM.aplicarDescuento(codigoInput)
-                                    mensajeDescuento = resultado
-                                    mostrarMensaje = true
-                                    codigoInput = ""
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954))
-                            ) {
-                                Text("Aplicar")
-                            }
-                        }
-
-                        if (mostrarMensaje) {
-                            Text(
-                                text = mensajeDescuento,
-                                color = if (descuentoAplicado > 0) Color.Green else Color.Red,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-
-                        if (descuentoAplicado > 0) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Descuento aplicado:")
-                                Text(
-                                    text = "${descuentoAplicado}%",
-                                    color = Color.Green,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Button(
-                                onClick = {
-                                    cartVM.limpiarDescuento()
-                                    mostrarMensaje = false
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                            ) {
-                                Text("Quitar descuento")
-                            }
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "Resumen de Compra",
                             fontSize = 18.sp,
@@ -287,10 +212,9 @@ fun CarritoScreen(
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
+
                         Button(
-                            onClick = {
-                                onProcederPago(totalConDescuento)
-                            },
+                            onClick = { onIrPago() },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
