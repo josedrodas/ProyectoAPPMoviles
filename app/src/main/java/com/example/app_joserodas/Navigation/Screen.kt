@@ -14,7 +14,7 @@ sealed class Screen(val route: String) {
 
     data object Carrito : Screen("carrito")
 
-    // tiene argumento dinámico {id}
+
     data object Producto : Screen("producto/{id}") {
         fun createRoute(id: Int): String = "producto/$id"
     }

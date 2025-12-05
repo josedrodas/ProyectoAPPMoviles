@@ -6,15 +6,11 @@ import com.example.app_joserodas.model.Libro
 
 class CartViewModel : ViewModel() {
 
-    // estado interno del carrito
     private val _carrito = mutableStateListOf<Libro>()
     val carrito: List<Libro> get() = _carrito
 
-    // descuento aplicado
     var descuentoAplicado: Int = 0
         private set
-
-    // códigos válidos
     private val codigosDescuento = mapOf(
         "LIBRO10" to 10,
         "LECTOR15" to 15,
@@ -43,6 +39,7 @@ class CartViewModel : ViewModel() {
 
     fun agregarAlCarrito(libro: Libro) {
         _carrito.add(libro)
+        // }
     }
 
     fun eliminarDelCarrito(libro: Libro) {

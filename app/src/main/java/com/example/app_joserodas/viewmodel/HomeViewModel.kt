@@ -2,16 +2,42 @@ package com.example.app_joserodas.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.app_joserodas.R
 import com.example.app_joserodas.model.Autor
 import com.example.app_joserodas.model.Editorial
 import com.example.app_joserodas.model.Libro
+import com.example.app_joserodas.model.OpenLibraryResponse
+import com.example.app_joserodas.model.WorkDetailResponse
+import com.google.gson.JsonElement
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
 
+interface BooksApiService {
+    @GET("search.json")
+    suspend fun searchBooks(@Query("q") query: String, @Query("limit") limit: Int = 20): OpenLibraryResponse
+
+    @GET("{key}.json")
+    suspend fun getWorkDetails(@Path("key", encoded = true) key: String): WorkDetailResponse
+}
+
+object RetrofitClient {
+    private const val BASE_URL = "https://openlibrary.org/"
+    val api: BooksApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(BooksApiService::class.java)
+    }
+}
 data class HomeUiState(
     val textoBusqueda: String = "",
     val estaBuscando: Boolean = false,
@@ -20,168 +46,120 @@ data class HomeUiState(
     val errorMsg: String? = null
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val api: BooksApiService = RetrofitClient.api
+) : ViewModel() {
 
-    // catálogo base
-    private val autores = listOf(
-        Autor(1, "Brandon", "Sanderson"),
-        Autor(2, "J. K.", "Rowling"),
-        Autor(3, "Isabel", "Allende")
-    )
-
-    private val editoriales = listOf(
-        Editorial(1, "Planeta", "Chile"),
-        Editorial(2, "Santillana", "España"),
-        Editorial(3, "Anagrama", "España")
-    )
-
-    val todosLosProductos: List<Libro> = listOf(
-        Libro(
-            1,
-            "Palabras Radiantes",
-            autores[0],
-            editoriales[0],
-            18990,
-            R.drawable.palabrasradiantes,
-            "Segundo libro de El Archivo de las Tormentas."
-        ),
-        Libro(
-            2,
-            "El Imperio Final",
-            autores[0],
-            editoriales[1],
-            15990,
-            R.drawable.imperiofinal,
-            "Primer libro de Nacidos de la Bruma."
-        ),
-        Libro(
-            3,
-            "Juramentada",
-            autores[0],
-            editoriales[0],
-            21990,
-            R.drawable.juramentada,
-            "Tercer libro de El Archivo de las Tormentas."
-        ),
-
-        Libro(
-            4,
-            "El Camino de los Reyes",
-            autores[0],
-            editoriales[0],
-            19990,
-            R.drawable.caminoreyes,
-            "Inicio de El Archivo de las Tormentas."
-        ),
-        Libro(
-            5,
-            "El Ritmo de la Guerra",
-            autores[0],
-            editoriales[0],
-            23990,
-            R.drawable.ritmoguerra,
-            "Cuarto libro de El Archivo de las Tormentas."
-        ),
-        Libro(
-            6,
-            "Dune",
-            Autor(4, "Frank", "Herbert"),
-            editoriales[2],
-            17990,
-            R.drawable.dune1,
-            "Clásico de ciencia ficción."
-        ),
-        Libro(
-            7,
-            "El Problema de los Tres Cuerpos",
-            Autor(5, "Cixin", "Liu"),
-            editoriales[2],
-            17990,
-            R.drawable.problema3cuerpos,
-            "Primera entrega de la trilogía."
-        ),
-        Libro(
-            8,
-            "Fundación",
-            Autor(6, "Isaac", "Asimov"),
-            editoriales[1],
-            15990,
-            R.drawable.fundacion,
-            "Pilar de la ciencia ficción."
-        ),
-        Libro(
-            9,
-            "1984",
-            Autor(7, "George", "Orwell"),
-            editoriales[2],
-            12990,
-            R.drawable.libro1984,
-            "Distopía sobre vigilancia y control."
-        ),
-        Libro(
-            10,
-            "Harry Potter y la Piedra Filosofal",
-            autores[1],
-            editoriales[1],
-            13990,
-            R.drawable.piedrafilosofal,
-            "El comienzo del joven mago."
-        )
-    )
-
-
-    private val _uiState = MutableStateFlow(
-        HomeUiState(
-            productos = todosLosProductos,
-            destacado = todosLosProductos.firstOrNull(),
-            errorMsg = null
-        )
-    )
+    private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
 
+    private var librosCargados: List<Libro> = emptyList()
+    private var searchJob: Job? = null
+
+    init {
+        buscarLibrosEnApi("Brandon Sanderson")
+    }
+
     fun buscarProductos(texto: String) {
-        _uiState.update { it.copy(textoBusqueda = texto, estaBuscando = true) }
+        _uiState.update { it.copy(textoBusqueda = texto) }
+        searchJob?.cancel()
 
-        viewModelScope.launch {
-            delay(300)
-            val query = texto.trim().lowercase()
-
-            val resultados = if (query.isBlank()) {
-                todosLosProductos
+        searchJob = viewModelScope.launch {
+            delay(800)
+            if (texto.isNotBlank()) {
+                buscarLibrosEnApi(texto)
             } else {
-                todosLosProductos.filter { libro ->
-                    libro.titulo.lowercase().contains(query) ||
-                            libro.autor.nombre.lowercase().contains(query) ||
-                            libro.autor.apellido.lowercase().contains(query) ||
-                            libro.editorial.nombre.lowercase().contains(query)
-                }
-            }
-
-            _uiState.update {
-                it.copy(
-                    estaBuscando = false,
-                    productos = resultados,
-                    errorMsg = if (resultados.isEmpty()) "Sin resultados" else null
-                )
+                _uiState.update { it.copy(productos = librosCargados, errorMsg = null) }
             }
         }
     }
 
-    fun limpiarBusqueda() {
-        _uiState.update {
-            it.copy(
-                textoBusqueda = "",
-                estaBuscando = false,
-                productos = todosLosProductos,
-                errorMsg = null
-            )
+    private fun buscarLibrosEnApi(query: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(estaBuscando = true, errorMsg = null) }
+            try {
+                val response = api.searchBooks(query)
+                val docs = response.docs ?: emptyList()
+
+                val librosNuevos = docs.map { doc ->
+                    val imageUrl = if (doc.coverId != null) "https://covers.openlibrary.org/b/id/${doc.coverId}-L.jpg" else null
+                    val precioRandom = (15000..45000).random()
+
+                    Libro(
+                        idLibro = doc.key,
+                        titulo = doc.title,
+                        autor = Autor(0, doc.authorName?.firstOrNull() ?: "Anónimo", ""),
+                        editorial = Editorial(0, doc.publisher?.firstOrNull() ?: "Varios", ""),
+                        precio = precioRandom,
+                        imagenUrl = imageUrl,
+                        descripcion = "Cargando descripción..."
+                    )
+                }
+
+                librosCargados = librosNuevos
+
+                _uiState.update {
+                    it.copy(
+                        estaBuscando = false,
+                        productos = librosNuevos,
+                        destacado = librosNuevos.firstOrNull(),
+                        errorMsg = if (librosNuevos.isEmpty()) "No encontrado" else null
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Este error ahora sí será capturado por el Test Unitario
+                _uiState.update {
+                    it.copy(estaBuscando = false, errorMsg = "Error de red: ${e.message}")
+                }
+            }
         }
+    }
+
+    fun cargarDescripcion(idLibro: String) {
+        viewModelScope.launch {
+            try {
+                val detalle = api.getWorkDetails(idLibro)
+                val descripcionReal = parseDescription(detalle.description)
+
+                val listaActualizada = _uiState.value.productos.map { libro ->
+                    if (libro.idLibro == idLibro) {
+                        libro.copy(descripcion = descripcionReal)
+                    } else {
+                        libro
+                    }
+                }
+                _uiState.update { it.copy(productos = listaActualizada) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun parseDescription(json: JsonElement?): String {
+        if (json == null) return "Sin descripción disponible."
+        return try {
+            if (json.isJsonPrimitive) {
+                json.asString
+            } else if (json.isJsonObject) {
+                json.asJsonObject.get("value")?.asString ?: "Sin descripción."
+            } else {
+                "Sin descripción disponible."
+            }
+        } catch (e: Exception) {
+            "Error al leer descripción."
+        }
+    }
+
+    fun limpiarBusqueda() {
+        _uiState.update { it.copy(textoBusqueda = "") }
+        buscarProductos("Fantasía")
     }
 
     fun setDestacado(libro: Libro?) {
         _uiState.update { it.copy(destacado = libro) }
     }
 
-    fun getProductoPorId(idLibro: Int): Libro? =
-        todosLosProductos.find { it.idLibro == idLibro }
+    fun getProductoPorId(idLibro: String): Libro? =
+        uiState.value.productos.find { it.idLibro == idLibro }
 }

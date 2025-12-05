@@ -6,13 +6,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 class AuthViewModel : ViewModel() {
 
-    // --- Tipos internos ---
     enum class Rol { ADMIN, USER }
     data class AppUser(val nombre: String, val email: String, val rol: Rol)
 
     private data class Cred(val email: String, val pass: String, val user: AppUser)
 
-    // usuarios simulados
     private val seededUsers = listOf(
         Cred(
             email = "admin@palabras.com",
@@ -34,7 +32,6 @@ class AuthViewModel : ViewModel() {
         )
     )
 
-    // usuario actual logeado
     private val _currentUser = MutableStateFlow<AppUser?>(null)
     val currentUser: StateFlow<AppUser?> = _currentUser
 

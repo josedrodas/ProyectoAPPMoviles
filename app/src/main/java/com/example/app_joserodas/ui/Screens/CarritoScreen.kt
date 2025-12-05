@@ -33,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage // <--- IMPORTANTE: Importamos Coil
 import com.example.app_joserodas.R
 import com.example.app_joserodas.model.Libro
 import com.example.app_joserodas.viewmodel.CartViewModel
@@ -54,9 +55,7 @@ fun CarritoScreen(
             .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -67,10 +66,7 @@ fun CarritoScreen(
             )
             Spacer(Modifier.weight(1f))
 
-            Box(
-                modifier = Modifier.size(44.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
                 Image(
                     painter = painterResource(id = R.drawable.carrito),
                     contentDescription = "Carrito",
@@ -86,12 +82,7 @@ fun CarritoScreen(
                             .align(Alignment.TopEnd),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = cant.toString(),
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(cant.toString(), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -112,28 +103,25 @@ fun CarritoScreen(
                     .weight(1f, fill = false)
             ) {
                 items(carrito) { libro ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp)
-                    ) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
-                                painter = painterResource(id = libro.imagenRes),
+                            // --- CAMBIO AQUÍ: Usamos AsyncImage en lugar de Image ---
+                            AsyncImage(
+                                model = libro.imagenUrl, // URL de internet
                                 contentDescription = libro.titulo,
-                                modifier = Modifier
-                                    .size(60.dp),
-                                contentScale = ContentScale.Crop
+                                modifier = Modifier.size(60.dp),
+                                contentScale = ContentScale.Crop,
+                                // Placeholder mientras carga
+                                placeholder = painterResource(R.drawable.logo_palabras_radiantes),
+                                error = painterResource(R.drawable.logo_palabras_radiantes)
                             )
 
                             Spacer(Modifier.size(12.dp))
 
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = libro.titulo,
                                     fontSize = 16.sp,
@@ -141,7 +129,7 @@ fun CarritoScreen(
                                     maxLines = 2
                                 )
                                 Text(
-                                    text = "por ${libro.autor.nombre} ${libro.autor.apellido}",
+                                    text = "por ${libro.autor.nombre}",
                                     fontSize = 13.sp,
                                     color = Color.Gray
                                 )
@@ -156,15 +144,9 @@ fun CarritoScreen(
                             Spacer(Modifier.size(12.dp))
 
                             IconButton(onClick = { viewModel.eliminarDelCarrito(libro) }) {
-                                Text(
-                                    text = "✕",
-                                    color = Color(0xFFDE4954),
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Text("✕", color = Color(0xFFDE4954), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
                         }
-
                         Spacer(Modifier.height(12.dp))
                         HorizontalDivider(color = Color(0xFFE0E0E0))
                     }
@@ -186,10 +168,7 @@ fun CarritoScreen(
 
         Button(
             onClick = { mensajeCodigo = viewModel.aplicarDescuento(codigo) },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFDE4954),
-                contentColor = Color.White
-            ),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954), contentColor = Color.White),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Aplicar código", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
@@ -197,11 +176,7 @@ fun CarritoScreen(
 
         if (mensajeCodigo != null) {
             Spacer(Modifier.height(8.dp))
-            Text(
-                mensajeCodigo!!,
-                fontSize = 14.sp,
-                color = Color(0xFF333333)
-            )
+            Text(mensajeCodigo!!, fontSize = 14.sp, color = Color(0xFF333333))
         }
 
         Spacer(Modifier.height(16.dp))
@@ -215,42 +190,20 @@ fun CarritoScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Subtotal:", fontSize = 14.sp, color = Color.Gray)
                     Text("$$subtotal", fontSize = 14.sp, color = Color.Gray)
                 }
                 Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Descuento:", fontSize = 14.sp, color = Color(0xFFDE4954))
                     Text("-$$ahorro", fontSize = 14.sp, color = Color(0xFFDE4954))
                 }
                 Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        "Total a pagar:",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "$$totalConDesc",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFDE4954)
-                    )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Total a pagar:", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("$$totalConDesc", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDE4954))
                 }
             }
         }
@@ -259,30 +212,15 @@ fun CarritoScreen(
 
         Button(
             onClick = onProcederPago,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFDE4954),
-                contentColor = Color.White
-            ),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE4954), contentColor = Color.White),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                "Proceder al pago",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Text("Proceder al pago", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
 
         Spacer(Modifier.height(12.dp))
-
-        TextButton(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                "Volver",
-                fontSize = 15.sp,
-                color = Color.Gray
-            )
+        TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Volver", fontSize = 15.sp, color = Color.Gray)
         }
     }
 }

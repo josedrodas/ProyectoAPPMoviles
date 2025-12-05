@@ -20,15 +20,14 @@ android {
         compose = true
     }
 
-    // Nota: con Kotlin 2.x ya NO usamos composeOptions { kotlinCompilerExtensionVersion = ... }
-
+    // CAMBIO IMPORTANTE AQUÍ: Subimos a Java 11 para que funcionen los Tests
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -55,4 +54,14 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Tus dependencias de API e Imágenes
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Tus dependencias de Testing (Las que pedían Java 11)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

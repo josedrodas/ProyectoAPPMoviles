@@ -6,14 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.app_joserodas.ui.screens.CarritoScreen
-import com.example.app_joserodas.ui.screens.HomeScreen
-import com.example.app_joserodas.ui.screens.LoginScreen
-import com.example.app_joserodas.ui.screens.PagoScreen
-import com.example.app_joserodas.ui.screens.PerfilScreen
-import com.example.app_joserodas.ui.screens.PreguntasScreen
-import com.example.app_joserodas.ui.screens.ProductoScreen
-import com.example.app_joserodas.ui.screens.TerminosScreen
+import com.example.app_joserodas.ui.screens.*
 import com.example.app_joserodas.viewmodel.AuthViewModel
 import com.example.app_joserodas.viewmodel.CartViewModel
 import com.example.app_joserodas.viewmodel.HomeViewModel
@@ -51,25 +44,9 @@ fun AppNav(
                 onLogged = { navController.popBackStack() }
             )
         }
-
-        composable("perfil") {
-            PerfilScreen(
-                viewModel = authViewModel,
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("faq") {
-            PreguntasScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable("terminos") {
-            TerminosScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
+        composable("perfil") { PerfilScreen(viewModel = authViewModel, onBack = { navController.popBackStack() }) }
+        composable("faq") { PreguntasScreen(onBack = { navController.popBackStack() }) }
+        composable("terminos") { TerminosScreen(onBack = { navController.popBackStack() }) }
 
         composable("carrito") {
             CarritoScreen(
@@ -78,7 +55,6 @@ fun AppNav(
                 onProcederPago = { navController.navigate("pago") }
             )
         }
-
         composable("pago") {
             PagoScreen(
                 cartViewModel = cartViewModel,
@@ -89,14 +65,15 @@ fun AppNav(
 
         composable(
             route = "producto/{id}",
-            arguments = listOf(
-                navArgument("id") { type = NavType.IntType }
-            )
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
-            val idLibro = backStackEntry.arguments?.getInt("id") ?: -1
-            ProductoScreen(
+            val idSucio = backStackEntry.arguments?.getString("id") ?: ""
+
+            val idLibro = idSucio.replace("_", "/")
+
+            Producto(
                 idLibro = idLibro,
-                getLibro = { libroId -> homeViewModel.getProductoPorId(libroId) },
+                viewModel = homeViewModel,
                 onAddToCart = { libro -> cartViewModel.agregarAlCarrito(libro) },
                 onBack = { navController.popBackStack() }
             )
