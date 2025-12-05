@@ -51,7 +51,7 @@ class CartViewModelTest {
         Dispatchers.resetMain()
     }
 
-    // test 1: Agregar al Carrito
+    // test 1 Agregar al Carrito
     @Test
     fun `agregarAlCarrito aumenta el tamaño de la lista`() {
         viewModel.agregarAlCarrito(libroBarato)
