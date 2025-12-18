@@ -150,9 +150,6 @@ La aplicación sigue el patrón MVVM (Model-View-ViewModel):
 - **targetSdk**: 35
 - **jvmTarget**: Java 11
 
-## Contribucion
-
-Las contribuciones son bienvenidas. Para cambios importantes, abre un issue para discutir los cambios propuestos.
 
 ## Autores
 
