@@ -158,10 +158,4 @@ Las contribuciones son bienvenidas. Para cambios importantes, abre un issue para
 
 - Jose Rodas
 
-## Licencia
 
-Este proyecto esta disponible bajo licencia privada.
-
-## Soporte
-
-Para reportar problemas o sugerencias, contacta con el equipo de desarrollo a través de GitHub Issues.
